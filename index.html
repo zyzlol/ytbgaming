@@ -3276,12 +3276,17 @@ function S(inner){
         scrollOffset = paintVisibleRows(rows, idx, maxVis, forceRebuild);
       }
       requestAnimationFrame(function(){
+        // Position the highlight WHILE .rendering is still active so that transitions
+        // are disabled (transition:none!important). Previously both the highlight update
+        // and the .rendering removal happened in the same rAF — that let the overlay
+        // TRANSITION from its old submenu position to the new parent-menu position
+        // instead of snapping, which is the "bubble stuck in a weird way" bug.
+        if(!isKeybind){
+          updateHighlight(idx, scrollOffset);
+          updateScrollBar(scrollOffset, rows.length, maxVis, idx, rows);
+        } else if(selOverlay){ selOverlay.style.opacity='0'; }
         requestAnimationFrame(function(){
           cluster.classList.remove('rendering');
-          if(!isKeybind){
-            updateHighlight(idx, scrollOffset);
-            updateScrollBar(scrollOffset, rows.length, maxVis, idx, rows);
-          } else if(selOverlay){ selOverlay.style.opacity='0'; }
         });
       });
 
