@@ -1447,16 +1447,17 @@ html.static-shark-ready .PWrapper.open{opacity:1;visibility:visible;pointer-even
 .PWrapper .PCategories:empty,.PWrapper .PCategories:not(.show){display:none;}
 .PWrapper .PCategories.show{display:flex;}
 /* List scroll and selection bubble share a curve/duration — keeps nav smooth without desync. */
-.PWrapper.fast-nav #list{transition:transform .12s cubic-bezier(.22,1,.36,1)!important;}.PWrapper.fast-nav #selOverlay{transition:top .12s cubic-bezier(.22,1,.36,1),height .12s cubic-bezier(.22,1,.36,1)!important;}.PWrapper.fast-nav #psProgress{transition:none!important;}
+.PWrapper.fast-nav #list{transition:transform .12s cubic-bezier(.22,1,.36,1),opacity .10s ease!important;}.PWrapper.fast-nav #selOverlay{transition:top .12s cubic-bezier(.22,1,.36,1),height .12s cubic-bezier(.22,1,.36,1)!important;}.PWrapper.fast-nav #psProgress{transition:none!important;}
 /* During full rebuilds (tab switches) snap heights and scroll instantly — content swaps in one
    frame so animating the container just makes the swap look jittery. */
 .PWrapper.rendering #listWrap{transition:none!important;}
+.PWrapper.rendering #list{transition:none!important;}
 .PWrapper.rendering #psProgress{transition:none!important;}
 /* Normal (non-fast-nav) navigation gets a slightly longer curve for smoothness. */
 .PWrapper:not(.fast-nav) #listWrap{transition:height .28s cubic-bezier(.22,1,.36,1),max-height .28s cubic-bezier(.22,1,.36,1)!important;}
-.PWrapper:not(.fast-nav) #list{transition:transform .28s cubic-bezier(.22,1,.36,1)!important;}
+.PWrapper:not(.fast-nav) #list{transition:transform .28s cubic-bezier(.22,1,.36,1),opacity .14s ease!important;}
 #listWrap{transition:height .2s cubic-bezier(.22,1,.36,1),max-height .2s cubic-bezier(.22,1,.36,1);}
-#list{position:relative;z-index:2;width:100%;transition:transform .2s cubic-bezier(.22,1,.36,1);}
+#list{position:relative;z-index:2;width:100%;transition:transform .2s cubic-bezier(.22,1,.36,1),opacity .14s ease;}
 #selOverlay{position:absolute!important;left:.11vw!important;right:auto!important;width:calc(100% - .22vw)!important;margin:0!important;padding:0!important;max-height:none!important;transform:none!important;box-sizing:border-box!important;border-radius:.3083vw!important;}
 .PTLabel > .fa-solid,
 .PTLabel .ico{
@@ -3256,14 +3257,16 @@ function S(inner){
       const maxVis = isKeybind ? DEFAULT_VIS : maxVisibleRows(showTabs, isMain);
       cluster.classList.add('rendering');
       cluster.classList.remove('fast-nav');
+      // Detect tab/section/mode identity change — the list content is swapping, not refreshing.
+      const listId = String(s.mode||'')+'|'+String(s.section||'')+'|'+String(s.tabIndex||0)+'|'+String(s.searchQuery||'')+'|'+rows.length;
+      const isTabSwitch = !isKeybind && (window.__staticListId !== listId) && window.__staticListId != null;
+      // On a tab switch, hide the list instantly before painting so the old content doesn't flash,
+      // then fade in the new content after the DOM is ready.
+      if(isTabSwitch && list){
+        list.style.transition = 'none';
+        list.style.opacity = '0';
+      }
       applyListHeight(rows.length, maxVis, isKeybind, isMain);
-      // Row painting: keybind mode owns no list rows (its UI is the keybind panel), so just clear.
-      // Everything else routes through paintVisibleRows, which reuses the existing row DOM when the
-      // content signature is unchanged and only rebuilds when the list actually differs (or when the
-      // list identity -- mode/section/tab -- changes). The old path here did an unconditional
-      // list.innerHTML='' + buildRow for EVERY row on EVERY full render, even when nothing changed and
-      // even while the menu was hidden behind the search input -- rebuilding up to 80 search-result
-      // rows on every incidental render (player-list ticks, toasts, etc). That was the search lag.
       let scrollOffset = 0;
       if(isKeybind){
         list.innerHTML='';
@@ -3272,9 +3275,6 @@ function S(inner){
         window.__staticScrollOff = 0;
         window.__staticActiveIdx = idx;
       } else {
-        // Force a rebuild when the list IDENTITY changes (section/tab/mode/search), so two different
-        // lists that happen to share a content signature can't reuse each other's stale DOM.
-        const listId = String(s.mode||'')+'|'+String(s.section||'')+'|'+String(s.tabIndex||0)+'|'+String(s.searchQuery||'')+'|'+rows.length;
         const forceRebuild = (window.__staticListId !== listId);
         window.__staticListId = listId;
         scrollOffset = paintVisibleRows(rows, idx, maxVis, forceRebuild);
@@ -3290,13 +3290,24 @@ function S(inner){
           updateHighlight(idx, scrollOffset);
           updateScrollBar(scrollOffset, rows.length, maxVis, idx, rows);
           // Force layout so the snap takes effect at the no-transition position,
-          // THEN restore the smooth curve for subsequent navigation.
+          // THEN clear the inline override — CSS classes take over for subsequent nav.
           if(selOverlay){
             void selOverlay.offsetHeight;
-            selOverlay.style.transition = 'top .28s cubic-bezier(.22,1,.36,1), height .2s ease';
+            selOverlay.style.transition = '';
+          }
+          // Fade the list content in on tab switches — gives visual continuity instead of a snap.
+          if(isTabSwitch && list){
+            void list.offsetHeight; // flush the opacity:0 snap
+            list.style.transition = 'opacity .14s ease';
+            list.style.opacity = '1';
           }
         } else if(selOverlay){ selOverlay.style.opacity='0'; }
         cluster.classList.remove('rendering');
+        // Clean up inline transition overrides after they've served their purpose,
+        // so CSS classes drive transitions on subsequent frames.
+        if(isTabSwitch && list){
+          setTimeout(function(){ list.style.transition = ''; }, 160);
+        }
       });
 
       if(footR && !isKeybind){
