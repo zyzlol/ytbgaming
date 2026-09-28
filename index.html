@@ -1449,7 +1449,7 @@ html.static-shark-ready .PWrapper.open{opacity:1;visibility:visible;pointer-even
 /* List scroll and selection bubble share a curve/duration — keeps nav smooth without desync. */
 .PWrapper.fast-nav #list{transition:transform .12s cubic-bezier(.22,1,.36,1)!important;}.PWrapper.fast-nav #selOverlay{transition:top .12s cubic-bezier(.22,1,.36,1),height .12s cubic-bezier(.22,1,.36,1)!important;}.PWrapper.fast-nav #psProgress{transition:none!important;}
 /* Full rebuilds (tab switches) must not animate in from the old scroll offset. */
-.PWrapper.rendering #list{transition:none!important;}.PWrapper.rendering #selOverlay{transition:none!important;}.PWrapper.rendering #psProgress{transition:none!important;}
+.PWrapper.rendering #list{transition:none!important;}.PWrapper.rendering #psProgress{transition:none!important;}
 .PWrapper.rendering #listWrap{transition:none!important;}
 #listWrap{transition:height .2s cubic-bezier(.22,1,.36,1),max-height .2s cubic-bezier(.22,1,.36,1);}
 #list{position:relative;z-index:2;width:100%;transition:transform .2s cubic-bezier(.22,1,.36,1);}
@@ -3275,19 +3275,24 @@ function S(inner){
         window.__staticListId = listId;
         scrollOffset = paintVisibleRows(rows, idx, maxVis, forceRebuild);
       }
+      // Snap the bubble to its new position WITHOUT animating (prevents the "stuck bubble"
+      // glitch where it transitions from a stale submenu position), then restore smooth
+      // transitions so the next up/down nav animates normally.
+      if(!isKeybind && selOverlay){
+        selOverlay.style.transition = 'none';
+      }
       requestAnimationFrame(function(){
-        // Position the highlight WHILE .rendering is still active so that transitions
-        // are disabled (transition:none!important). Previously both the highlight update
-        // and the .rendering removal happened in the same rAF — that let the overlay
-        // TRANSITION from its old submenu position to the new parent-menu position
-        // instead of snapping, which is the "bubble stuck in a weird way" bug.
         if(!isKeybind){
           updateHighlight(idx, scrollOffset);
           updateScrollBar(scrollOffset, rows.length, maxVis, idx, rows);
+          // Force layout so the snap takes effect at the no-transition position,
+          // THEN restore the smooth curve for subsequent navigation.
+          if(selOverlay){
+            void selOverlay.offsetHeight;
+            selOverlay.style.transition = 'top .28s cubic-bezier(.22,1,.36,1), height .2s ease';
+          }
         } else if(selOverlay){ selOverlay.style.opacity='0'; }
-        requestAnimationFrame(function(){
-          cluster.classList.remove('rendering');
-        });
+        cluster.classList.remove('rendering');
       });
 
       if(footR && !isKeybind){
