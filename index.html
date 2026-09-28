@@ -1448,9 +1448,8 @@ html.static-shark-ready .PWrapper.open{opacity:1;visibility:visible;pointer-even
 .PWrapper .PCategories.show{display:flex;}
 /* List scroll and selection bubble share a curve/duration — keeps nav smooth without desync. */
 .PWrapper.fast-nav #list{transition:transform .12s cubic-bezier(.22,1,.36,1)!important;}.PWrapper.fast-nav #selOverlay{transition:top .12s cubic-bezier(.22,1,.36,1),height .12s cubic-bezier(.22,1,.36,1)!important;}.PWrapper.fast-nav #psProgress{transition:none!important;}
-/* Full rebuilds (tab switches) must not animate in from the old scroll offset. */
-.PWrapper.rendering #list{transition:none!important;}.PWrapper.rendering #psProgress{transition:none!important;}
-.PWrapper.rendering #listWrap{transition:none!important;}
+/* Scroll progress bar snaps during rebuilds; list + listWrap keep smooth transitions for tab switches. */
+.PWrapper.rendering #psProgress{transition:none!important;}
 #listWrap{transition:height .2s cubic-bezier(.22,1,.36,1),max-height .2s cubic-bezier(.22,1,.36,1);}
 #list{position:relative;z-index:2;width:100%;transition:transform .2s cubic-bezier(.22,1,.36,1);}
 #selOverlay{position:absolute!important;left:.11vw!important;right:auto!important;width:calc(100% - .22vw)!important;margin:0!important;padding:0!important;max-height:none!important;transform:none!important;box-sizing:border-box!important;border-radius:.3083vw!important;}
