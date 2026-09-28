@@ -1448,8 +1448,13 @@ html.static-shark-ready .PWrapper.open{opacity:1;visibility:visible;pointer-even
 .PWrapper .PCategories.show{display:flex;}
 /* List scroll and selection bubble share a curve/duration — keeps nav smooth without desync. */
 .PWrapper.fast-nav #list{transition:transform .12s cubic-bezier(.22,1,.36,1)!important;}.PWrapper.fast-nav #selOverlay{transition:top .12s cubic-bezier(.22,1,.36,1),height .12s cubic-bezier(.22,1,.36,1)!important;}.PWrapper.fast-nav #psProgress{transition:none!important;}
-/* Scroll progress bar snaps during rebuilds; list + listWrap keep smooth transitions for tab switches. */
+/* During full rebuilds (tab switches) snap heights and scroll instantly — content swaps in one
+   frame so animating the container just makes the swap look jittery. */
+.PWrapper.rendering #listWrap{transition:none!important;}
 .PWrapper.rendering #psProgress{transition:none!important;}
+/* Normal (non-fast-nav) navigation gets a slightly longer curve for smoothness. */
+.PWrapper:not(.fast-nav) #listWrap{transition:height .28s cubic-bezier(.22,1,.36,1),max-height .28s cubic-bezier(.22,1,.36,1)!important;}
+.PWrapper:not(.fast-nav) #list{transition:transform .28s cubic-bezier(.22,1,.36,1)!important;}
 #listWrap{transition:height .2s cubic-bezier(.22,1,.36,1),max-height .2s cubic-bezier(.22,1,.36,1);}
 #list{position:relative;z-index:2;width:100%;transition:transform .2s cubic-bezier(.22,1,.36,1);}
 #selOverlay{position:absolute!important;left:.11vw!important;right:auto!important;width:calc(100% - .22vw)!important;margin:0!important;padding:0!important;max-height:none!important;transform:none!important;box-sizing:border-box!important;border-radius:.3083vw!important;}
@@ -2982,7 +2987,7 @@ function S(inner){
   window.__staticApplyListHeight = applyListHeight;
 
   const ROW_OVERSCAN = 3;
-  const VIRT_THRESHOLD = 120; // keep smooth translateY for typical tabs (incl. Server keybinds)
+  const VIRT_THRESHOLD = 40; // virtualise earlier — 120 DOM nodes was too heavy for CEF DUI
 
   function syncListHeader(){
     if(listSectionHeader) listSectionHeader.classList.remove('show');
@@ -3313,7 +3318,7 @@ function S(inner){
     if(!s || !s.open || !list || !list.children.length) return false;
     if(s.mode==='keybind' || s.inputOpen) return false;
     const rows=s.rows||[];
-    if(!rows.length || list.children.length!==rows.length) return false;
+    if(!rows.length) return false;
     const prevIdx=(window.__staticActiveIdx==null)?-1:window.__staticActiveIdx;
     s.activeRow=Number(activeRow)||1;
     if(typeof footerRight==='string') s.footerRight=footerRight;
@@ -3327,13 +3332,23 @@ function S(inner){
     const fast=(now-_lastSelAt)<90;
     cluster.classList.toggle('fast-nav', fast);
     _lastSelAt=now;
-    for(let i=0;i<list.children.length;i++) list.children[i].classList.toggle('active', i===idx);
 
     const showTabs = s.tabs && s.tabs.length>1;
-    const maxVis = maxVisibleRows(showTabs, s.mode==='main');
-    applyListHeight(rows.length, maxVis, false, s.mode==='main');
-    const scrollOffset=calcScrollOffset(idx, rows.length, maxVis, s.mode==='main');
-    setListShift(scrollOffset, true);
+    const isMain = s.mode==='main';
+    const maxVis = maxVisibleRows(showTabs, isMain);
+    const useVirt = rows.length > VIRT_THRESHOLD;
+
+    if(useVirt){
+      // Virtual mode: repaint the visible window around the new index.
+      paintVisibleRows(rows, idx, maxVis, false);
+    } else {
+      // Smooth mode: all rows are in DOM, just toggle .active classes.
+      for(let i=0;i<list.children.length;i++) list.children[i].classList.toggle('active', i===idx);
+    }
+
+    applyListHeight(rows.length, maxVis, false, isMain);
+    const scrollOffset=calcScrollOffset(idx, rows.length, maxVis, isMain);
+    if(!useVirt) setListShift(scrollOffset, true);
     window.__staticScrollOff = scrollOffset;
     window.__staticActiveIdx = idx;
     requestAnimationFrame(function(){
