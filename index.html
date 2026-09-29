@@ -91,6 +91,45 @@ html,body,.PWrapper,.Desc,.FCWrapper,.Option,.PCategories,.PCategory,.PTabs,.PTa
 
 /* Hide chrome until the first keybind/main paint — prevents a 1-frame empty menu flash. */
 html:not(.static-shark-ready) #cluster{opacity:0!important;visibility:hidden!important;pointer-events:none!important;transition:none!important;}
+
+/* ═══ BOOT / LOADING SCREEN ═══════════════════════════════════════════════════════════════════════
+   Renders immediately on page load before ANY Lua message arrives. Lua sends bootProgress messages
+   to update the bar + stage text as it initialises. First real render sends bootDone → crossfade
+   to the menu. The screen auto-hides after 20s as a safety net (in case bootDone never fires). */
+.boot-screen{
+    position:fixed;inset:0;z-index:99999;
+    display:flex;justify-content:center;align-items:center;
+    background:rgba(6,6,10,0.98);
+    transition:opacity 0.45s cubic-bezier(.4,0,.2,1), visibility 0.45s cubic-bezier(.4,0,.2,1);
+}
+.boot-screen.boot-done{opacity:0;visibility:hidden;pointer-events:none;}
+.boot-inner{display:flex;flex-direction:column;align-items:center;gap:.7vw;transform:translateY(-1vw);}
+.boot-logo{
+    font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;font-size:1.6vw;font-weight:700;
+    letter-spacing:.35em;text-transform:uppercase;
+    color:rgba(var(--menu-color,22,137,212),0.92);
+    text-shadow:0 0 2.5vw rgba(var(--menu-color,22,137,212),0.25);
+}
+.boot-bar-track{
+    width:10vw;height:.18vw;border-radius:.12vw;
+    background:rgba(255,255,255,0.06);overflow:hidden;
+    margin-top:.15vw;
+}
+.boot-bar-fill{
+    width:3%;height:100%;border-radius:.12vw;
+    background:linear-gradient(90deg,rgba(var(--menu-color,22,137,212),0.7),rgba(var(--menu-color,22,137,212),1));
+    transition:width .4s cubic-bezier(.25,.46,.45,.94);
+}
+.boot-stage{
+    font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;font-size:.42vw;font-weight:400;
+    letter-spacing:.08em;color:rgba(255,255,255,0.35);text-transform:uppercase;
+    min-height:.6vw;
+}
+.boot-pct{
+    font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;font-size:.38vw;font-weight:500;
+    letter-spacing:.04em;color:rgba(var(--menu-color,22,137,212),0.5);
+    margin-top:-.15vw;
+}
 html,body,.PWrapper{font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;font-optical-sizing:auto;}
     :root {
         --menu-color: 22, 137, 212;
@@ -1927,6 +1966,15 @@ html.static-shark-ready .PWrapper.open{opacity:1;visibility:visible;pointer-even
 </style>
 </head>
 <body>
+<!-- ═══ BOOT SCREEN — visible immediately, before any Lua message ═══ -->
+<div class="boot-screen" id="bootScreen">
+  <div class="boot-inner">
+    <div class="boot-logo">STATIC</div>
+    <div class="boot-bar-track"><div class="boot-bar-fill" id="bootBarFill"></div></div>
+    <div class="boot-pct" id="bootPct"></div>
+    <div class="boot-stage" id="bootStage">Loading...</div>
+  </div>
+</div>
 <div class="Desc" id="descBox"><span id="descText"></span></div>
 <div class="PWrapper" id="cluster">
   <div class="PBanner" id="banner">
@@ -3341,7 +3389,23 @@ function S(inner){
     if(d.action==='weaponWheelShow' && window.__staticWWShow){ window.__staticWWShow(d.weaponWheel||{}); }
     else if(d.action==='weaponWheelUpdate' && window.__staticWWUpdate){ window.__staticWWUpdate(d.weaponWheel||{}); }
     else if(d.action==='weaponWheelHide' && window.__staticWWHide){ window.__staticWWHide(); }
+    else if(d.action==='bootProgress'){
+      // Staged loading: Lua sends {pct:0-100, stage:"text"} as boot proceeds.
+      var _bf=document.getElementById('bootBarFill');
+      var _bs=document.getElementById('bootStage');
+      var _bp=document.getElementById('bootPct');
+      if(_bf) _bf.style.width=Math.min(100,Math.max(0,Number(d.pct)||0))+'%';
+      if(_bs && d.stage) _bs.textContent=String(d.stage);
+      if(_bp) _bp.textContent=Math.round(Number(d.pct)||0)+'%';
+    }
+    else if(d.action==='bootDone'){
+      // Crossfade: loading screen out, menu in.
+      var _bsc=document.getElementById('bootScreen');
+      if(_bsc){ _bsc.classList.add('boot-done'); setTimeout(function(){ if(_bsc.parentNode) _bsc.parentNode.removeChild(_bsc); }, 600); }
+    }
     else if(d.action==='render'){
+      // Auto-dismiss boot screen on first render (safety: in case bootDone wasn't sent).
+      if(!window.__staticBootDismissed){ window.__staticBootDismissed=true; var _bsr=document.getElementById('bootScreen'); if(_bsr){ _bsr.classList.add('boot-done'); setTimeout(function(){ if(_bsr.parentNode) _bsr.parentNode.removeChild(_bsr); }, 600); } }
       var p=d.payload;
       if(p==null && d.text!=null){
         p=typeof d.text==='string' ? (function(){ try{return JSON.parse(d.text);}catch(_){return null;} })() : d.text;
