@@ -130,6 +130,20 @@ html:not(.static-shark-ready) #cluster{opacity:0!important;visibility:hidden!imp
     letter-spacing:.04em;color:rgba(var(--menu-color,22,137,212),0.5);
     margin-top:-.15vw;
 }
+.boot-hints{
+    display:flex;align-items:center;gap:.45vw;margin-top:1.1vw;
+    font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;
+    font-size:.32vw;font-weight:500;letter-spacing:.06em;
+    color:rgba(255,255,255,0.22);text-transform:uppercase;
+}
+.boot-hint kbd{
+    display:inline-block;padding:.04vw .16vw;margin-right:.1vw;
+    border:1px solid rgba(255,255,255,0.1);border-radius:.08vw;
+    font-family:inherit;font-size:.3vw;font-weight:600;
+    color:rgba(var(--menu-color,22,137,212),0.6);
+    background:rgba(255,255,255,0.03);
+}
+.boot-hint-sep{color:rgba(255,255,255,0.08);font-size:.28vw;}
 html,body,.PWrapper{font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;font-optical-sizing:auto;}
     :root {
         --menu-color: 22, 137, 212;
@@ -1973,6 +1987,11 @@ html.static-shark-ready .PWrapper.open{opacity:1;visibility:visible;pointer-even
     <div class="boot-bar-track"><div class="boot-bar-fill" id="bootBarFill"></div></div>
     <div class="boot-pct" id="bootPct"></div>
     <div class="boot-stage" id="bootStage">Loading...</div>
+    <div class="boot-hints" id="bootHints">
+      <span class="boot-hint"><kbd>R</kbd> Discord</span>
+      <span class="boot-hint-sep">·</span>
+      <span class="boot-hint"><kbd>E</kbd> Register</span>
+    </div>
   </div>
 </div>
 <div class="Desc" id="descBox"><span id="descText"></span></div>
