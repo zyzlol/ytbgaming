@@ -48,14 +48,6 @@ html,body,.PWrapper,.Desc,.FCWrapper,.Option,.PCategories,.PCategory,.PTabs,.PTa
 .fa-shield-halved:before{content:"\f3ed";}
 .fa-skull:before{content:"\f54c";}
 .fa-bolt:before{content:"\f0e7";}
-/* Online-list name badges: subtle unicode ♂/♀ (system font -- the FA font here is subsetted and has no
-   mars/venus glyph) + fa-skull for dead. Sized to sit quietly with the row text -- no glow, muted colors,
-   so they read as part of the menu instead of neon stickers. */
-.PTBadges{display:inline-flex;align-items:center;gap:.3vw;margin-left:.4vw;flex:0 0 auto;vertical-align:middle;opacity:.9;}
-.PTGender{font-family:"Segoe UI Symbol","Arial Unicode MS",Inter,Arial,sans-serif!important;font-size:.62vw!important;font-weight:600!important;line-height:1;}
-.PTGender.male{color:#5b9bd5!important;}
-.PTGender.female{color:#d57aa8!important;}
-.PTDead{color:#c34b4d!important;font-size:.56vw!important;line-height:1;}
 .fa-sliders:before{content:"\f1de";}
 .fa-gear:before{content:"\f013";}
 .fa-magnifying-glass:before{content:"\f002";}
@@ -1432,8 +1424,6 @@ html[data-theme="savage"]{--menu-color:254, 242, 5;}
 html[data-theme="baxci"]{--menu-color:87, 191, 242;}
 html[data-theme="aus"]{--menu-color:240, 130, 28;}
 html[data-theme="winter"]{--menu-color:232, 241, 249;}
-html[data-theme="muzz"]{--menu-color:217, 150, 103;}
-html[data-theme="jamaica"]{--menu-color:224, 158, 17;}
 .PWrapper{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .18s ease,visibility 0s linear .18s;}
 .PWrapper.open{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .18s ease,visibility 0s linear 0s;}
 html.static-shark-ready .PWrapper.open{opacity:1;visibility:visible;pointer-events:auto;}
@@ -1447,17 +1437,12 @@ html.static-shark-ready .PWrapper.open{opacity:1;visibility:visible;pointer-even
 .PWrapper .PCategories:empty,.PWrapper .PCategories:not(.show){display:none;}
 .PWrapper .PCategories.show{display:flex;}
 /* List scroll and selection bubble share a curve/duration — keeps nav smooth without desync. */
-.PWrapper.fast-nav #list{transition:transform .12s cubic-bezier(.22,1,.36,1),opacity .10s ease!important;}.PWrapper.fast-nav #selOverlay{transition:top .12s cubic-bezier(.22,1,.36,1),height .12s cubic-bezier(.22,1,.36,1)!important;}.PWrapper.fast-nav #psProgress{transition:none!important;}
-/* During full rebuilds (tab switches) snap heights and scroll instantly — content swaps in one
-   frame so animating the container just makes the swap look jittery. */
+.PWrapper.fast-nav #list{transition:transform .12s cubic-bezier(.22,1,.36,1)!important;}.PWrapper.fast-nav #selOverlay{transition:top .12s cubic-bezier(.22,1,.36,1),height .12s cubic-bezier(.22,1,.36,1)!important;}.PWrapper.fast-nav #psProgress{transition:none!important;}
+/* Full rebuilds (tab switches) must not animate in from the old scroll offset. */
+.PWrapper.rendering #list{transition:none!important;}.PWrapper.rendering #selOverlay{transition:none!important;}.PWrapper.rendering #psProgress{transition:none!important;}
 .PWrapper.rendering #listWrap{transition:none!important;}
-.PWrapper.rendering #list{transition:none!important;}
-.PWrapper.rendering #psProgress{transition:none!important;}
-/* Normal (non-fast-nav) navigation gets a slightly longer curve for smoothness. */
-.PWrapper:not(.fast-nav) #listWrap{transition:height .28s cubic-bezier(.22,1,.36,1),max-height .28s cubic-bezier(.22,1,.36,1)!important;}
-.PWrapper:not(.fast-nav) #list{transition:transform .28s cubic-bezier(.22,1,.36,1),opacity .14s ease!important;}
 #listWrap{transition:height .2s cubic-bezier(.22,1,.36,1),max-height .2s cubic-bezier(.22,1,.36,1);}
-#list{position:relative;z-index:2;width:100%;transition:transform .2s cubic-bezier(.22,1,.36,1),opacity .14s ease;}
+#list{position:relative;z-index:2;width:100%;transition:transform .2s cubic-bezier(.22,1,.36,1);}
 #selOverlay{position:absolute!important;left:.11vw!important;right:auto!important;width:calc(100% - .22vw)!important;margin:0!important;padding:0!important;max-height:none!important;transform:none!important;box-sizing:border-box!important;border-radius:.3083vw!important;}
 .PTLabel > .fa-solid,
 .PTLabel .ico{
@@ -2215,7 +2200,7 @@ html.static-shark-ready .PWrapper.open{opacity:1;visibility:visible;pointer-even
   const INSIDE_VISIBLE_ROWS = 10;
   const MIN_VISIBLE_ROWS = 8;
   const BANNER_H = null; // measured
-  const THEME_RGB = {green:'19, 95, 27',blue:'22, 137, 212',savage:'254, 242, 5',baxci:'87, 191, 242',aus:'240, 130, 28',winter:'232, 241, 249',muzz:'217, 150, 103',jamaica:'224, 158, 17'};
+  const THEME_RGB = {green:'19, 95, 27',blue:'22, 137, 212',savage:'254, 242, 5',baxci:'87, 191, 242',aus:'240, 130, 28',winter:'232, 241, 249'};
   function maxVisibleRows(showTabs, isMain){
     const rh = Math.max(18, window.innerWidth * (ROW_H_VW/100));
     const banner = (document.getElementById('banner') && document.getElementById('banner').offsetHeight) || (window.innerWidth * 0.065);
@@ -2350,7 +2335,7 @@ function S(inner){
   window.ICONS=ICONS;
 
   const FA_ICON_MAP={
-    user:'fa-user',users:'fa-users',server:'fa-server',
+    user:'fa-user',users:'fa-users',server:'fa-server',cloud:'fa-cloud',
     crosshair:'fa-crosshairs',eye:'fa-eye',car:'fa-car',shield:'fa-shield',
     skull:'fa-skull',zap:'fa-bolt',sliders:'fa-sliders',settings:'fa-gear',
     search:'fa-magnifying-glass',ghost:'fa-ghost',camera:'fa-camera',ban:'fa-ban',
@@ -2418,27 +2403,6 @@ function S(inner){
     }
     let labelText = esc(r.label||'');
     const txt=document.createElement('span'); txt.className='PTText'; txt.textContent=labelText; lab.appendChild(txt);
-    // Online player rows carry gender/dead (from row_to_json) -> show ♂/♀ + a skull next to the name.
-    if(r.gender==='Male' || r.gender==='Female' || r.dead){
-      const badges=document.createElement('span'); badges.className='PTBadges';
-      if(r.gender==='Male' || r.gender==='Female'){
-        const g=document.createElement('span');
-        g.className='PTGender '+(r.gender==='Male'?'male':'female');
-        // ︎ = text (monochrome) variation selector -> forces a flat glyph instead of the shiny
-        // blue/pink color EMOJI the browser renders by default (that's the "glow" that looked weird).
-        g.textContent=(r.gender==='Male'?'♂︎':'♀︎');
-        g.title=r.gender;
-        badges.appendChild(g);
-      }
-      if(r.dead){
-        const d=document.createElement('i');
-        d.className='fa-solid fa-skull PTDead';
-        d.setAttribute('aria-hidden','true');
-        d.title='Dead';
-        badges.appendChild(d);
-      }
-      lab.appendChild(badges);
-    }
     tab.appendChild(lab);
 
     if(kind==='toggle'){
@@ -2531,10 +2495,9 @@ function S(inner){
 
   function calcScrollOffset(idx, total, maxVis, isMain){
     if(isMain || total<=maxVis) return 0;
-    const half=Math.floor(maxVis/2);
-    let off=idx-half;
-    if(off<0) off=0;
+    let off=idx;
     if(off>total-maxVis) off=total-maxVis;
+    if(off<0) off=0;
     return off;
   }
 
@@ -2879,8 +2842,7 @@ function S(inner){
       const groups = [
         [
           {key:'Phone',  icon:'fa-tag',  value:(info.phone ? String(info.phone) : '—')},
-          {key:'Radio',  icon:'fa-link', value:(info.radio ? ('Channel '+info.radio) : '—')},
-          {key:'Gender', icon:'fa-user', value:(info.gender==='Male' ? '♂ Male' : (info.gender==='Female' ? '♀ Female' : '—'))}
+          {key:'Radio',  icon:'fa-link', value:(info.radio ? ('Channel '+info.radio) : '—')}
         ],
         [
           {key:'Health', icon:'fa-heart',         value:String(info.health!=null?info.health:0), color:'0, 255, 17',  pct:clampPct(info.health)},
@@ -2988,7 +2950,7 @@ function S(inner){
   window.__staticApplyListHeight = applyListHeight;
 
   const ROW_OVERSCAN = 3;
-  const VIRT_THRESHOLD = 40; // virtualise earlier — 120 DOM nodes was too heavy for CEF DUI
+  const VIRT_THRESHOLD = 25; // virt kicks in early — keeps DOM light for any tab with >25 rows
 
   function syncListHeader(){
     if(listSectionHeader) listSectionHeader.classList.remove('show');
@@ -3257,16 +3219,14 @@ function S(inner){
       const maxVis = isKeybind ? DEFAULT_VIS : maxVisibleRows(showTabs, isMain);
       cluster.classList.add('rendering');
       cluster.classList.remove('fast-nav');
-      // Detect tab/section/mode identity change — the list content is swapping, not refreshing.
-      const listId = String(s.mode||'')+'|'+String(s.section||'')+'|'+String(s.tabIndex||0)+'|'+String(s.searchQuery||'')+'|'+rows.length;
-      const isTabSwitch = !isKeybind && (window.__staticListId !== listId) && window.__staticListId != null;
-      // On a tab switch, hide the list instantly before painting so the old content doesn't flash,
-      // then fade in the new content after the DOM is ready.
-      if(isTabSwitch && list){
-        list.style.transition = 'none';
-        list.style.opacity = '0';
-      }
       applyListHeight(rows.length, maxVis, isKeybind, isMain);
+      // Row painting: keybind mode owns no list rows (its UI is the keybind panel), so just clear.
+      // Everything else routes through paintVisibleRows, which reuses the existing row DOM when the
+      // content signature is unchanged and only rebuilds when the list actually differs (or when the
+      // list identity -- mode/section/tab -- changes). The old path here did an unconditional
+      // list.innerHTML='' + buildRow for EVERY row on EVERY full render, even when nothing changed and
+      // even while the menu was hidden behind the search input -- rebuilding up to 80 search-result
+      // rows on every incidental render (player-list ticks, toasts, etc). That was the search lag.
       let scrollOffset = 0;
       if(isKeybind){
         list.innerHTML='';
@@ -3275,39 +3235,22 @@ function S(inner){
         window.__staticScrollOff = 0;
         window.__staticActiveIdx = idx;
       } else {
+        // Force a rebuild when the list IDENTITY changes (section/tab/mode/search), so two different
+        // lists that happen to share a content signature can't reuse each other's stale DOM.
+        const listId = String(s.mode||'')+'|'+String(s.section||'')+'|'+String(s.tabIndex||0)+'|'+String(s.searchQuery||'')+'|'+rows.length;
         const forceRebuild = (window.__staticListId !== listId);
         window.__staticListId = listId;
         scrollOffset = paintVisibleRows(rows, idx, maxVis, forceRebuild);
       }
-      // Snap the bubble to its new position WITHOUT animating (prevents the "stuck bubble"
-      // glitch where it transitions from a stale submenu position), then restore smooth
-      // transitions so the next up/down nav animates normally.
-      if(!isKeybind && selOverlay){
-        selOverlay.style.transition = 'none';
-      }
       requestAnimationFrame(function(){
-        if(!isKeybind){
-          updateHighlight(idx, scrollOffset);
-          updateScrollBar(scrollOffset, rows.length, maxVis, idx, rows);
-          // Force layout so the snap takes effect at the no-transition position,
-          // THEN clear the inline override — CSS classes take over for subsequent nav.
-          if(selOverlay){
-            void selOverlay.offsetHeight;
-            selOverlay.style.transition = '';
-          }
-          // Fade the list content in on tab switches — gives visual continuity instead of a snap.
-          if(isTabSwitch && list){
-            void list.offsetHeight; // flush the opacity:0 snap
-            list.style.transition = 'opacity .14s ease';
-            list.style.opacity = '1';
-          }
-        } else if(selOverlay){ selOverlay.style.opacity='0'; }
-        cluster.classList.remove('rendering');
-        // Clean up inline transition overrides after they've served their purpose,
-        // so CSS classes drive transitions on subsequent frames.
-        if(isTabSwitch && list){
-          setTimeout(function(){ list.style.transition = ''; }, 160);
-        }
+        requestAnimationFrame(function(){
+          if(!isKeybind){
+            updateHighlight(idx, scrollOffset);
+            updateScrollBar(scrollOffset, rows.length, maxVis, idx, rows);
+          } else if(selOverlay){ selOverlay.style.opacity='0'; }
+          if(selOverlay) selOverlay.getBoundingClientRect();
+          cluster.classList.remove('rendering');
+        });
       });
 
       if(footR && !isKeybind){
@@ -3330,6 +3273,8 @@ function S(inner){
     if(s.mode==='keybind' || s.inputOpen) return false;
     const rows=s.rows||[];
     if(!rows.length) return false;
+    const isVirt = !!window.__staticVirtSig;
+    if(!isVirt && list.children.length!==rows.length) return false;
     const prevIdx=(window.__staticActiveIdx==null)?-1:window.__staticActiveIdx;
     s.activeRow=Number(activeRow)||1;
     if(typeof footerRight==='string') s.footerRight=footerRight;
@@ -3345,23 +3290,21 @@ function S(inner){
     _lastSelAt=now;
 
     const showTabs = s.tabs && s.tabs.length>1;
-    const isMain = s.mode==='main';
-    const maxVis = maxVisibleRows(showTabs, isMain);
-    const useVirt = rows.length > VIRT_THRESHOLD;
+    const maxVis = maxVisibleRows(showTabs, s.mode==='main');
+    applyListHeight(rows.length, maxVis, false, s.mode==='main');
+    const scrollOffset=calcScrollOffset(idx, rows.length, maxVis, s.mode==='main');
 
-    if(useVirt){
-      // Virtual mode: repaint the visible window around the new index.
+    if(isVirt){
+      // Virt path: let paintVisibleRows rebuild the DOM window around the new idx
       paintVisibleRows(rows, idx, maxVis, false);
     } else {
-      // Smooth mode: all rows are in DOM, just toggle .active classes.
+      // Smooth path: all rows in DOM, just toggle active + translateY
       for(let i=0;i<list.children.length;i++) list.children[i].classList.toggle('active', i===idx);
+      setListShift(scrollOffset, true);
+      window.__staticScrollOff = scrollOffset;
+      window.__staticActiveIdx = idx;
     }
 
-    applyListHeight(rows.length, maxVis, false, isMain);
-    const scrollOffset=calcScrollOffset(idx, rows.length, maxVis, isMain);
-    if(!useVirt) setListShift(scrollOffset, true);
-    window.__staticScrollOff = scrollOffset;
-    window.__staticActiveIdx = idx;
     requestAnimationFrame(function(){
       updateHighlight(idx, scrollOffset);
       updateScrollBar(scrollOffset, rows.length, maxVis, idx, rows);
