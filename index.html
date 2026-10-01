@@ -2845,6 +2845,16 @@ function S(inner){
     span.textContent=item.value;                 // textContent -> safe with player-supplied names
     if(item.warn) span.style.color='#D82325';
     val.appendChild(span);
+    // Dead indicator: a red skull sits right after the ♂/♀ on the Gender row when the target is dead,
+    // and nothing when alive (gender row passes deadSkull=true only while !info.alive).
+    if(item.deadSkull){
+      const sk=document.createElement('i');
+      sk.className='fa-solid fa-skull';
+      sk.style.color='#D82325';
+      sk.style.marginLeft='.35vw';
+      sk.title='Dead';
+      val.appendChild(sk);
+    }
     if(item.color){
       const status=document.createElement('div');
       status.className='Status';
@@ -2875,7 +2885,7 @@ function S(inner){
         [
           {key:'Phone',  icon:'fa-tag',  value:(info.phone ? String(info.phone) : '—')},
           {key:'Radio',  icon:'fa-link', value:(info.radio ? ('Channel '+info.radio) : '—')},
-          {key:'Gender', icon:'fa-user', value:(info.gender==='Male' ? '♂ Male' : (info.gender==='Female' ? '♀ Female' : '—'))}
+          {key:'Gender', icon:'fa-user', value:(info.gender==='Male' ? '♂ Male' : (info.gender==='Female' ? '♀ Female' : '—')), deadSkull: (info.alive===false)}
         ],
         [
           {key:'Health', icon:'fa-heart',         value:String(info.health!=null?info.health:0), color:'0, 255, 17',  pct:clampPct(info.health)},
@@ -3170,6 +3180,14 @@ function S(inner){
   if(document.fonts && !window.__staticFontsHooked){
     window.__staticFontsHooked=true;
     document.fonts.ready.then(function(){
+      // First-open fix: the very first render can land BEFORE the Font Awesome webfont is ready, so the
+      // player-info panel + selection bubble come up styled differently than on every later open (fonts
+      // cached by then). Once fonts are ready, re-run the last full render so the first open matches the
+      // rest -- highlight, side panels and all -- instead of only nudging the highlight.
+      const s=window.__staticLastState;
+      if(s && typeof window.staticRender==='function'){
+        try{ window.staticRender(s); return; }catch(e){}
+      }
       const idx=window.__staticActiveIdx;
       if(idx==null || !list || !selOverlay) return;
       updateHighlight(idx, window.__staticScrollOff||0);
