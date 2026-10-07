@@ -366,9 +366,23 @@ html,body,.PWrapper{font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;font-op
         background: rgba(255,255,255,0.03);
     }
 
+    /* Mayhem-style gradient sweep ::before — animates scaleY on tab activation */
+    .PWrapper .PCategories .PCategory::before {
+        content: ''; position: absolute; bottom: 0; left: 0;
+        width: 100%; height: 100%;
+        background: linear-gradient(to top, rgba(var(--menu-color),0.3) 0%, transparent 85%);
+        transform: scaleY(0); transform-origin: bottom;
+        transition: transform .5s cubic-bezier(.4,0,.2,1);
+        z-index: -1;
+    }
+
     .PWrapper .PCategories .PCategory.active {
         color: #fff;
-        background: linear-gradient(0deg, rgba(var(--menu-color),0.16) 0%, transparent 100%);
+        background: transparent;
+    }
+
+    .PWrapper .PCategories .PCategory.active::before {
+        transform: scaleY(1);
     }
 
     .PWrapper .PCategories .PCategory.active::after {
@@ -1434,9 +1448,27 @@ html[data-theme="aus"]{--menu-color:240, 130, 28;}
 html[data-theme="winter"]{--menu-color:232, 241, 249;}
 html[data-theme="muzz"]{--menu-color:217, 150, 103;}
 html[data-theme="jamaica"]{--menu-color:224, 158, 17;}
-.PWrapper{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .18s ease,visibility 0s linear .18s;}
-.PWrapper.open{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .18s ease,visibility 0s linear 0s;}
-html.static-shark-ready .PWrapper.open{opacity:1;visibility:visible;pointer-events:auto;}
+.PWrapper{opacity:0;visibility:hidden;pointer-events:none;transform:scale(0.95);transition:opacity .3s cubic-bezier(.4,0,.2,1),transform .3s cubic-bezier(.4,0,.2,1),visibility 0s linear .3s;}
+.PWrapper.open{opacity:1;visibility:visible;pointer-events:auto;transform:scale(1);transition:opacity .3s cubic-bezier(.4,0,.2,1),transform .3s cubic-bezier(.4,0,.2,1),visibility 0s linear 0s;}
+.PWrapper.mayhem-hiding{opacity:0;transform:scale(0.95);pointer-events:none;}
+html.static-shark-ready .PWrapper.open{opacity:1;visibility:visible;pointer-events:auto;transform:scale(1);}
+/* Mayhem-style staggered child reveals */
+.PWrapper .PBanner{opacity:0;transform:translateY(-.9vh);transition:opacity .3s cubic-bezier(.4,0,.2,1) 0s,transform .3s cubic-bezier(.4,0,.2,1) 0s;}
+.PWrapper.open .PBanner{opacity:1;transform:translateY(0);transition-delay:50ms,50ms;}
+.PWrapper.mayhem-hiding .PBanner{opacity:0;transform:translateY(-.9vh);transition-delay:0s,0s;}
+.PWrapper .PCategories.show{transition:opacity .3s cubic-bezier(.4,0,.2,1) 0s,transform .3s cubic-bezier(.4,0,.2,1) 0s,color .2s ease,background .25s ease;}
+.PWrapper:not(.open) .PCategories.show{opacity:0;transform:translateY(-.45vh);}
+.PWrapper.open .PCategories.show{opacity:1;transform:translateY(0);transition-delay:75ms,75ms,0s,0s;}
+.PWrapper.mayhem-hiding .PCategories.show{opacity:0;transform:translateY(-.45vh);transition-delay:0s,0s,0s,0s;}
+.PWrapper .PTabs{opacity:0;transform:translateY(-.45vh);transition:opacity .3s cubic-bezier(.4,0,.2,1) 0s,transform .3s cubic-bezier(.4,0,.2,1) 0s;}
+.PWrapper.open .PTabs{opacity:1;transform:translateY(0);transition-delay:100ms,100ms;}
+.PWrapper.mayhem-hiding .PTabs{opacity:0;transform:translateY(-.45vh);transition-delay:0s,0s;}
+.PWrapper .PFooter{opacity:0;transform:translateY(1vh);transition:opacity .3s cubic-bezier(.4,0,.2,1) 0s,transform .3s cubic-bezier(.4,0,.2,1) 0s;}
+.PWrapper.open .PFooter{opacity:1;transform:translateY(0);transition-delay:150ms,150ms;}
+.PWrapper.mayhem-hiding .PFooter{opacity:0;transform:translateY(1vh);transition-delay:0s,0s;}
+.PWrapper .PScroll{opacity:0;transition:opacity .3s cubic-bezier(.4,0,.2,1) 0s;}
+.PWrapper.open .PScroll{opacity:1;transition-delay:100ms;}
+.PWrapper.mayhem-hiding .PScroll{opacity:0;transition-delay:0s;}
 .PWrapper.input-hidden{opacity:0!important;visibility:hidden!important;pointer-events:none!important;}
 .PWrapper.color-picker-open{opacity:.72;pointer-events:none;}
 .PWrapper.gun-picker-open{opacity:.88;}
@@ -1934,6 +1966,21 @@ html.static-shark-ready .PWrapper.open{opacity:1;visibility:visible;pointer-even
 .vw-hub-cat{font-size:9.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#0e99de;margin-bottom:4px;}
 .vw-hub-w{font-size:14px;font-weight:700;max-width:150px;margin:0 auto;}
 .vw-hub-i{margin-top:10px;font-size:11.5px;font-weight:700;color:rgba(255,255,255,.9);}
+
+/* ===== Mayhem Bubble UI (hovering-text) ===== */
+.hovering-text-wrap{position:fixed;bottom:7.5vh;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;outline:none;min-width:18.52vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;opacity:0;pointer-events:none;transition:opacity .3s cubic-bezier(.4,0,.2,1),transform .3s cubic-bezier(.4,0,.2,1);z-index:9999;}
+.hovering-text-wrap.ht-visible{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0);}
+.hovering-text-wrap:not(.ht-visible){transform:translateX(-50%) translateY(1vh);}
+[data-hovering-text-hidden="true"]{display:none!important;}
+.hovering-text-list{list-style:none;margin:0;padding:0;text-align:center;pointer-events:none;user-select:none;max-height:calc(9 * (1.3vh * 1.3 + .37vh));overflow-y:auto;overflow-x:hidden;scrollbar-width:none;-ms-overflow-style:none;display:flex;flex-direction:column;align-items:center;scroll-behavior:smooth;}
+.hovering-text-list::-webkit-scrollbar{display:none;}
+.hovering-text-item{padding:.185vh 0;font-size:1.3vh;line-height:1.3;transition:transform .22s cubic-bezier(.2,.9,.2,1),color .22s cubic-bezier(.2,.9,.2,1),letter-spacing .22s;transform-origin:center;white-space:nowrap;min-width:27.78vh;font-weight:600;color:#fff;}
+.hovering-text-inactive{color:rgba(255,255,255,.55);transform:scale(.98);letter-spacing:0;}
+.hovering-text-selected{transform:scale(1.03);font-weight:600;letter-spacing:.015vh;color:rgb(var(--menu-color));}
+@keyframes hovering-text-pulse{0%{transform:translateY(-.185vh) scale(1.03);}30%{transform:translateY(-.556vh) scale(1.08);}100%{transform:translateY(-.185vh) scale(1.03);}}
+.hovering-text-activated{animation:hovering-text-pulse .42s cubic-bezier(.2,.9,.3,1) both;}
+.hovering-text-toast{position:absolute;left:50%;transform:translateX(-50%);bottom:8vh;background:transparent;padding:.556vh 1.111vh;border-radius:.741vh;font-weight:600;opacity:0;pointer-events:none;transition:opacity .26s ease;color:rgb(var(--menu-color));font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;font-size:1.3vh;z-index:9999;}
+.hovering-text-toast.visible{opacity:1;}
 </style>
 </head>
 <body>
@@ -3208,7 +3255,22 @@ function S(inner){
       applyTheme(s.theme, s.bannerUrl);
 
       const open=!!s.open;
-      cluster.classList.toggle('open', open);
+      const wasOpen = cluster.classList.contains('open');
+      // Mayhem-style hide: add 'mayhem-hiding' so children animate out, then remove after 300ms
+      if(!open && wasOpen && !cluster.classList.contains('mayhem-hiding')){
+        cluster.classList.remove('open');
+        cluster.classList.add('mayhem-hiding');
+        clearTimeout(window.__staticMayhemHideTimer);
+        window.__staticMayhemHideTimer=setTimeout(function(){
+          cluster.classList.remove('mayhem-hiding');
+        },300);
+      } else if(open){
+        clearTimeout(window.__staticMayhemHideTimer);
+        cluster.classList.remove('mayhem-hiding');
+        cluster.classList.add('open');
+      } else if(!open){
+        cluster.classList.remove('open','mayhem-hiding');
+      }
       const isKeybind = s.mode==='keybind';
       cluster.classList.toggle('keybind-mode', isKeybind);
 
@@ -3609,6 +3671,241 @@ async function pasteFromClipboard(){
     window.__staticMenuPaste=text;
   }
 window.pasteFromClipboard=pasteFromClipboard;
+})();
+</script>
+
+<!-- Mayhem Bubble UI (hovering-text) DOM -->
+<div class="hovering-text-wrap" id="hoveringTextWrap" tabindex="0" role="listbox" aria-hidden="true">
+  <ul class="hovering-text-list" id="hoveringTextList"></ul>
+</div>
+<div class="hovering-text-toast" id="hoveringTextToast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===== Mayhem Bubble UI — ported from Mayhem index.html ===== */
+(function(){
+  var wrap = document.getElementById('hoveringTextWrap');
+  var listEl = document.getElementById('hoveringTextList');
+  var toast = document.getElementById('hoveringTextToast');
+  if(!wrap || !listEl) return;
+
+  var htVisible = false;
+  var htSelectedIndex = 0;
+  var htOptions = [];
+  var htItems = [];
+  var htTransitioning = false;
+  var htTransitionTimeout = null;
+
+  function htClamp(v,mn,mx){ return Math.max(mn,Math.min(mx,v)); }
+  function htWrapIndex(idx){ return htItems.length ? ((idx % htItems.length + htItems.length) % htItems.length) : 0; }
+
+  function htFindNearestIndex(prevId){
+    if(!htItems.length) return 0;
+    for(var i=0;i<htItems.length;i++){
+      if(htItems[i].dataset.id===prevId) return i;
+    }
+    return htClamp(htSelectedIndex, 0, htItems.length-1);
+  }
+
+  function htMenuColor(){
+    try{ return getComputedStyle(document.documentElement).getPropertyValue('--menu-color').trim() || '22, 137, 212'; }catch(e){ return '22, 137, 212'; }
+  }
+
+  function htRenderList(preserveId){
+    var prevId = preserveId || (htItems[htSelectedIndex] && htItems[htSelectedIndex].dataset.id) || null;
+    listEl.innerHTML = '';
+    for(var i=0;i<htOptions.length;i++){
+      var opt = htOptions[i];
+      var li = document.createElement('li');
+      li.className = 'hovering-text-item';
+      li.dataset.id = String(opt.id);
+      var fullData = (opt.data && opt.data.trim()) ? (opt.name + ' ' + opt.data) : opt.name;
+      li.dataset.data = fullData;
+      li.textContent = String(opt.name);
+      li.id = 'hovering-text-opt-' + i;
+      listEl.appendChild(li);
+    }
+    htItems = [].slice.call(listEl.querySelectorAll('.hovering-text-item'));
+    htSelectedIndex = htFindNearestIndex(prevId);
+    htUpdateSelection();
+  }
+
+  function htUpdateMask(){
+    var sT = listEl.scrollTop;
+    var sH = listEl.scrollHeight;
+    var cH = listEl.clientHeight;
+    var sB = sH - sT - cH;
+    var fd = 50;
+    var tF = Math.min(sT / fd, 1) * 15;
+    var bF = 100 - Math.min(sB / fd, 1) * 15;
+    var safeT = Math.min(tF, bF - 5);
+    var safeB = Math.max(bF, tF + 5);
+    var g = 'linear-gradient(to bottom, transparent 0%, black ' + safeT + '%, black ' + safeB + '%, transparent 100%)';
+    listEl.style.maskImage = g;
+    listEl.style.webkitMaskImage = g;
+  }
+
+  function htScrollToSelected(){
+    if(!htItems.length || htSelectedIndex < 0) return;
+    var sel = htItems[htSelectedIndex];
+    if(!sel) return;
+    sel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function htUpdateSelection(){
+    if(!htItems.length){ htSelectedIndex=0; listEl.innerHTML=''; return; }
+    var mc = htMenuColor();
+    for(var i=0;i<htItems.length;i++){
+      var it = htItems[i];
+      var isSel = (i === htSelectedIndex);
+      it.classList.toggle('hovering-text-selected', isSel);
+      it.classList.toggle('hovering-text-inactive', !isSel);
+      if(isSel){
+        var data = it.dataset.data;
+        var hasParen = data.indexOf('(') >= 0;
+        if(hasParen){
+          var colored = data.replace(/\(([^)]+)\)/g, '(<span style="color:rgb('+mc+');">$1</span>)');
+          it.innerHTML = '<span style="color:#fff;">' + colored + '</span>';
+        } else {
+          it.innerHTML = '<span style="color:rgb('+mc+');">' + data + '</span>';
+        }
+        it.setAttribute('aria-current', 'true');
+        wrap.setAttribute('aria-activedescendant', it.id);
+      } else {
+        var opt = null;
+        for(var j=0;j<htOptions.length;j++){
+          if(String(htOptions[j].id)===it.dataset.id){ opt=htOptions[j]; break; }
+        }
+        it.textContent = opt ? opt.name : it.textContent;
+        it.style.color = '';
+        it.removeAttribute('aria-current');
+      }
+    }
+    htScrollToSelected();
+    setTimeout(htUpdateMask, 50);
+  }
+
+  function htShowToast(text, ms){
+    ms = ms || 900;
+    toast.textContent = text;
+    toast.classList.add('visible');
+    clearTimeout(htShowToast._t);
+    htShowToast._t = setTimeout(function(){ toast.classList.remove('visible'); }, ms);
+  }
+
+  function htActivateSelection(){
+    var el = htItems[htSelectedIndex];
+    if(!el) return null;
+    el.classList.remove('hovering-text-activated');
+    void el.offsetWidth;
+    el.classList.add('hovering-text-activated');
+    var id = el.dataset.id;
+    var name = el.textContent.trim();
+    htShowToast('Selected: ' + name + ' (id: ' + id + ')');
+    return { id: id, name: name };
+  }
+
+  listEl.addEventListener('scroll', htUpdateMask);
+
+  /* ---- public API ---- */
+  window.hoveringText = {
+    showList: function(){
+      if(htTransitioning && htVisible) return;
+      if(htTransitionTimeout){ clearTimeout(htTransitionTimeout); htTransitionTimeout=null; }
+      htVisible = true;
+      htTransitioning = true;
+      wrap.removeAttribute('data-hovering-text-hidden');
+      wrap.setAttribute('aria-hidden', 'false');
+      // Start hidden, then animate in
+      wrap.classList.remove('ht-visible');
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          wrap.classList.add('ht-visible');
+          htTransitionTimeout = setTimeout(function(){
+            htTransitioning = false;
+            htTransitionTimeout = null;
+          }, 300);
+        });
+      });
+      wrap.focus();
+      htRenderList();
+    },
+
+    hideList: function(){
+      if(htTransitioning && !htVisible) return;
+      if(htTransitionTimeout){ clearTimeout(htTransitionTimeout); htTransitionTimeout=null; }
+      htVisible = false;
+      htTransitioning = true;
+      wrap.classList.remove('ht-visible');
+      htTransitionTimeout = setTimeout(function(){
+        htTransitioning = false;
+        htTransitionTimeout = null;
+        wrap.setAttribute('data-hovering-text-hidden', 'true');
+        wrap.setAttribute('aria-hidden', 'true');
+      }, 300);
+    },
+
+    setOptions: function(opts){
+      htOptions = (opts && opts.length) ? opts : [];
+      if(htVisible) htRenderList();
+    },
+
+    moveUp: function(){
+      if(!htItems.length) return;
+      htSelectedIndex = htWrapIndex(htSelectedIndex - 1);
+      htUpdateSelection();
+    },
+
+    moveDown: function(){
+      if(!htItems.length) return;
+      htSelectedIndex = htWrapIndex(htSelectedIndex + 1);
+      htUpdateSelection();
+    },
+
+    select: function(){
+      return htActivateSelection();
+    },
+
+    setIndex: function(idx){
+      if(!htItems.length) return;
+      htSelectedIndex = htClamp(idx, 0, htItems.length - 1);
+      htUpdateSelection();
+    },
+
+    getSelectedIndex: function(){ return htSelectedIndex; },
+    isVisible: function(){ return htVisible; },
+    getSelectedOption: function(){
+      var el = htItems[htSelectedIndex];
+      if(!el) return null;
+      return { id: el.dataset.id, name: el.textContent.trim() };
+    }
+  };
+
+  /* ---- Wire into message handler for Lua control ---- */
+  window.addEventListener('message', function(e){
+    var d = e && e.data;
+    // Unwrap Static DUI wrapper if present
+    if(d && typeof d === 'object' && d.__smsg) d = d.__smsg;
+    if(!d || typeof d !== 'object') return;
+    if(d.t === 'ht' || d.type === 'hoveringText'){
+      var action = d.action || '';
+      if(action === 'showList' || action === 'show'){
+        if(d.options) window.hoveringText.setOptions(d.options);
+        window.hoveringText.showList();
+      } else if(action === 'hideList' || action === 'hide'){
+        window.hoveringText.hideList();
+      } else if(action === 'setOptions'){
+        window.hoveringText.setOptions(d.options || []);
+      } else if(action === 'moveUp'){
+        window.hoveringText.moveUp();
+      } else if(action === 'moveDown'){
+        window.hoveringText.moveDown();
+      } else if(action === 'select'){
+        window.hoveringText.select();
+      } else if(action === 'setIndex'){
+        window.hoveringText.setIndex(Number(d.index) || 0);
+      }
+    }
+  });
 })();
 </script>
 </body>
