@@ -1448,27 +1448,33 @@ html[data-theme="aus"]{--menu-color:240, 130, 28;}
 html[data-theme="winter"]{--menu-color:232, 241, 249;}
 html[data-theme="muzz"]{--menu-color:217, 150, 103;}
 html[data-theme="jamaica"]{--menu-color:224, 158, 17;}
-.PWrapper{opacity:0;visibility:hidden;pointer-events:none;transform:scale(0.95);transition:opacity .3s cubic-bezier(.4,0,.2,1),transform .3s cubic-bezier(.4,0,.2,1),visibility 0s linear .3s;}
-.PWrapper.open{opacity:1;visibility:visible;pointer-events:auto;transform:scale(1);transition:opacity .3s cubic-bezier(.4,0,.2,1),transform .3s cubic-bezier(.4,0,.2,1),visibility 0s linear 0s;}
-.PWrapper.mayhem-hiding{opacity:0;transform:scale(0.95);pointer-events:none;}
-html.static-shark-ready .PWrapper.open{opacity:1;visibility:visible;pointer-events:auto;transform:scale(1);}
-/* Mayhem-style staggered child reveals */
-.PWrapper .PBanner{opacity:0;transform:translateY(-.9vh);transition:opacity .3s cubic-bezier(.4,0,.2,1) 0s,transform .3s cubic-bezier(.4,0,.2,1) 0s;}
-.PWrapper.open .PBanner{opacity:1;transform:translateY(0);transition-delay:50ms,50ms;}
-.PWrapper.mayhem-hiding .PBanner{opacity:0;transform:translateY(-.9vh);transition-delay:0s,0s;}
-.PWrapper .PCategories.show{transition:opacity .3s cubic-bezier(.4,0,.2,1) 0s,transform .3s cubic-bezier(.4,0,.2,1) 0s,color .2s ease,background .25s ease;}
-.PWrapper:not(.open) .PCategories.show{opacity:0;transform:translateY(-.45vh);}
-.PWrapper.open .PCategories.show{opacity:1;transform:translateY(0);transition-delay:75ms,75ms,0s,0s;}
-.PWrapper.mayhem-hiding .PCategories.show{opacity:0;transform:translateY(-.45vh);transition-delay:0s,0s,0s,0s;}
-.PWrapper .PTabs{opacity:0;transform:translateY(-.45vh);transition:opacity .3s cubic-bezier(.4,0,.2,1) 0s,transform .3s cubic-bezier(.4,0,.2,1) 0s;}
-.PWrapper.open .PTabs{opacity:1;transform:translateY(0);transition-delay:100ms,100ms;}
-.PWrapper.mayhem-hiding .PTabs{opacity:0;transform:translateY(-.45vh);transition-delay:0s,0s;}
-.PWrapper .PFooter{opacity:0;transform:translateY(1vh);transition:opacity .3s cubic-bezier(.4,0,.2,1) 0s,transform .3s cubic-bezier(.4,0,.2,1) 0s;}
-.PWrapper.open .PFooter{opacity:1;transform:translateY(0);transition-delay:150ms,150ms;}
-.PWrapper.mayhem-hiding .PFooter{opacity:0;transform:translateY(1vh);transition-delay:0s,0s;}
-.PWrapper .PScroll{opacity:0;transition:opacity .3s cubic-bezier(.4,0,.2,1) 0s;}
-.PWrapper.open .PScroll{opacity:1;transition-delay:100ms;}
-.PWrapper.mayhem-hiding .PScroll{opacity:0;transition-delay:0s;}
+/* ── Mayhem 1-1 show/hide: per-element .visible / .hiding, JS setTimeout stagger ── */
+/* Root wrapper uses opacity+visibility only (transform is locked by INDEX_POS_LOCK !important).
+   The scale(0.95→1) feel comes from the child elements' translateY animations instead. */
+.PWrapper{opacity:0;visibility:hidden;pointer-events:none;transition:opacity 0.3s cubic-bezier(0.4,0,0.2,1),visibility 0s linear 0.3s;}
+.PWrapper.visible{opacity:1;visibility:visible;pointer-events:auto;transition:opacity 0.3s cubic-bezier(0.4,0,0.2,1),visibility 0s linear 0s;}
+.PWrapper.hiding{opacity:0;pointer-events:none;}
+html.static-shark-ready .PWrapper.visible{opacity:1;visibility:visible;pointer-events:auto;}
+/* Banner — slides down from -0.9vh, same 0.3s cubic-bezier as Mayhem #header-wrapper */
+.PWrapper .PBanner{opacity:0;transform:translateY(-0.9vh);transition:opacity 0.3s cubic-bezier(0.4,0,0.2,1),transform 0.3s cubic-bezier(0.4,0,0.2,1);}
+.PWrapper .PBanner.visible{opacity:1;transform:translateY(0);}
+.PWrapper .PBanner.hiding{opacity:0;transform:translateY(-0.9vh);}
+/* Categories (tab bar) — slides down from -0.45vh, same as Mayhem #menu-container */
+.PWrapper .PCategories.show{opacity:0;transform:translateY(-0.45vh);transition:opacity 0.3s cubic-bezier(0.4,0,0.2,1),transform 0.3s cubic-bezier(0.4,0,0.2,1),color 0.2s ease,background 0.25s ease;}
+.PWrapper .PCategories.show.visible{opacity:1;transform:translateY(0);}
+.PWrapper .PCategories.show.hiding{opacity:0;transform:translateY(-0.45vh);}
+/* PTabs (items container) — slides down from -0.45vh, same as Mayhem #menu-container */
+.PWrapper .PTabs{opacity:0;transform:translateY(-0.45vh);transition:opacity 0.3s cubic-bezier(0.4,0,0.2,1),transform 0.3s cubic-bezier(0.4,0,0.2,1);}
+.PWrapper .PTabs.visible{opacity:1;transform:translateY(0);}
+.PWrapper .PTabs.hiding{opacity:0;transform:translateY(-0.45vh);}
+/* Footer — slides up from 1vh, same as Mayhem #menu-footer */
+.PWrapper .PFooter{opacity:0;transform:translateY(1vh);transition:opacity 0.3s cubic-bezier(0.4,0,0.2,1),transform 0.3s cubic-bezier(0.4,0,0.2,1);}
+.PWrapper .PFooter.visible{opacity:1;transform:translateY(0);}
+.PWrapper .PFooter.hiding{opacity:0;transform:translateY(1vh);}
+/* Scrollbar — opacity only, same as Mayhem #menu-scrollbar */
+.PWrapper .PScroll{opacity:0;transition:opacity 0.3s cubic-bezier(0.4,0,0.2,1);}
+.PWrapper .PScroll.visible{opacity:1;}
+.PWrapper .PScroll.hiding{opacity:0;}
 .PWrapper.input-hidden{opacity:0!important;visibility:hidden!important;pointer-events:none!important;}
 .PWrapper.color-picker-open{opacity:.72;pointer-events:none;}
 .PWrapper.gun-picker-open{opacity:.88;}
@@ -1479,12 +1485,12 @@ html.static-shark-ready .PWrapper.open{opacity:1;visibility:visible;pointer-even
 .PWrapper .PCategories:empty,.PWrapper .PCategories:not(.show){display:none;}
 .PWrapper .PCategories.show{display:flex;}
 /* List scroll and selection bubble share a curve/duration — keeps nav smooth without desync. */
-.PWrapper.fast-nav #list{transition:transform .12s cubic-bezier(.22,1,.36,1)!important;}.PWrapper.fast-nav #selOverlay{transition:top .12s cubic-bezier(.22,1,.36,1),height .12s cubic-bezier(.22,1,.36,1)!important;}.PWrapper.fast-nav #psProgress{transition:none!important;}
+.PWrapper.fast-nav #list{transition:transform .12s cubic-bezier(.22,1,.36,1)!important;}.PWrapper.fast-nav #selOverlay{transition:top .12s cubic-bezier(.22,1,.36,1)!important;}.PWrapper.fast-nav #psProgress{transition:none!important;}
 /* Full rebuilds (tab switches) must not animate in from the old scroll offset. */
 .PWrapper.rendering #list{transition:none!important;}.PWrapper.rendering #selOverlay{transition:none!important;}.PWrapper.rendering #psProgress{transition:none!important;}
 .PWrapper.rendering #listWrap{transition:none!important;}
-#listWrap{transition:height .2s cubic-bezier(.22,1,.36,1),max-height .2s cubic-bezier(.22,1,.36,1);}
-#list{position:relative;z-index:2;width:100%;transition:transform .2s cubic-bezier(.22,1,.36,1);}
+#listWrap{transition:height 0.25s ease-out,max-height 0.25s ease-out;}
+#list{position:relative;z-index:2;width:100%;transition:transform 0.25s ease-out;}
 #selOverlay{position:absolute!important;left:.11vw!important;right:auto!important;width:calc(100% - .22vw)!important;margin:0!important;padding:0!important;max-height:none!important;transform:none!important;box-sizing:border-box!important;border-radius:.3083vw!important;}
 .PTLabel > .fa-solid,
 .PTLabel .ico{
@@ -1559,7 +1565,7 @@ html.static-shark-ready .PWrapper.open{opacity:1;visibility:visible;pointer-even
   filter:drop-shadow(0 .55vw 1.6vw rgba(0,0,0,.55));
   transition:opacity .16s ease, transform .16s ease, visibility 0s linear 0s;
 }
-.PWrapper.keybind-mode.open{
+.PWrapper.keybind-mode.visible{
   transform:translateX(-50%) translateY(0) scale(calc(var(--menu-scale)*var(--resolution-scale))) !important;
 }
 .PWrapper.keybind-mode .PElements,
@@ -1968,9 +1974,7 @@ html.static-shark-ready .PWrapper.open{opacity:1;visibility:visible;pointer-even
 .vw-hub-i{margin-top:10px;font-size:11.5px;font-weight:700;color:rgba(255,255,255,.9);}
 
 /* ===== Mayhem Bubble UI (hovering-text) ===== */
-.hovering-text-wrap{position:fixed;bottom:7.5vh;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;outline:none;min-width:18.52vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;opacity:0;pointer-events:none;transition:opacity .3s cubic-bezier(.4,0,.2,1),transform .3s cubic-bezier(.4,0,.2,1);z-index:9999;}
-.hovering-text-wrap.ht-visible{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0);}
-.hovering-text-wrap:not(.ht-visible){transform:translateX(-50%) translateY(1vh);}
+.hovering-text-wrap{position:fixed;bottom:7.5vh;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;outline:none;min-width:18.52vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;z-index:9999;}
 [data-hovering-text-hidden="true"]{display:none!important;}
 .hovering-text-list{list-style:none;margin:0;padding:0;text-align:center;pointer-events:none;user-select:none;max-height:calc(9 * (1.3vh * 1.3 + .37vh));overflow-y:auto;overflow-x:hidden;scrollbar-width:none;-ms-overflow-style:none;display:flex;flex-direction:column;align-items:center;scroll-behavior:smooth;}
 .hovering-text-list::-webkit-scrollbar{display:none;}
@@ -2001,7 +2005,7 @@ html.static-shark-ready .PWrapper.open{opacity:1;visibility:visible;pointer-even
     <div class="PRightElements">
       <div class="PCategories" id="tabsbar"></div>
       <div class="PTabs" id="listWrap">
-        <div id="selOverlay" style="position:absolute;left:.11vw;right:auto;width:calc(100% - .22vw);height:1.6vw;border-radius:.3083vw;pointer-events:none;z-index:0;opacity:0;box-sizing:border-box;margin:0;transform:none;transition:top 200ms ease, height 120ms ease;"></div>
+        <div id="selOverlay" style="position:absolute;left:.11vw;right:auto;width:calc(100% - .22vw);height:1.6vw;border-radius:.3083vw;pointer-events:none;z-index:0;opacity:0;box-sizing:border-box;margin:0;transform:none;transition:top 0.25s ease-out;"></div>
         <div class="keybind-panel" id="keybindPanel">
           <div class="kb-head">
             <div class="kb-icon" id="kbCaptureIcon">
@@ -2641,7 +2645,7 @@ function S(inner){
     const fastNav = cluster && cluster.classList.contains('fast-nav');
     selOverlay.style.transition = fastNav
       ? 'top .12s cubic-bezier(.22,1,.36,1), height .12s cubic-bezier(.22,1,.36,1)'
-      : 'top .28s cubic-bezier(.22,1,.36,1), height .2s ease';
+      : 'top 0.25s ease-out';
   }
   window.__staticUpdateHighlight = updateHighlight;
   window.__staticUpdateScrollBar = updateScrollBar;
@@ -3255,21 +3259,55 @@ function S(inner){
       applyTheme(s.theme, s.bannerUrl);
 
       const open=!!s.open;
-      const wasOpen = cluster.classList.contains('open');
-      // Mayhem-style hide: add 'mayhem-hiding' so children animate out, then remove after 300ms
-      if(!open && wasOpen && !cluster.classList.contains('mayhem-hiding')){
-        cluster.classList.remove('open');
-        cluster.classList.add('mayhem-hiding');
-        clearTimeout(window.__staticMayhemHideTimer);
-        window.__staticMayhemHideTimer=setTimeout(function(){
-          cluster.classList.remove('mayhem-hiding');
+      const wasVisible = cluster.classList.contains('visible');
+      /* ── Mayhem 1-1 show/hide ──
+         showMenu: clear hiding, force-reflow, rAF → root.visible, then
+                   banner +50ms, container(cats+tabs) +100ms, footer +150ms, scrollbar +100ms
+         hideMenu: add .hiding to ALL simultaneously, 300ms later strip both classes */
+      var _banner = document.getElementById('banner');
+      var _cats   = tabsbar;         // .PCategories
+      var _tabs   = listWrap;        // .PTabs
+      var _footer = cluster.querySelector('.PFooter');
+      var _scroll = document.getElementById('pScroll');
+      var _children = [_banner, _cats, _tabs, _footer, _scroll];
+
+      if(open && !wasVisible){
+        // ── SHOW (Mayhem showMenu 1-1) ──
+        if(window.__staticHideTimer){clearTimeout(window.__staticHideTimer);window.__staticHideTimer=null;}
+        // Strip any leftover hiding/visible from all
+        [cluster].concat(_children).forEach(function(el){if(el){el.classList.remove('hiding','visible');}});
+        // Force reflow
+        cluster.offsetHeight;
+        // rAF → stagger
+        requestAnimationFrame(function(){
+          cluster.classList.add('visible');
+          if(_banner) setTimeout(function(){_banner.classList.add('visible');}, 50);
+          if(_cats)   setTimeout(function(){_cats.classList.add('visible');}, 100);
+          if(_tabs)   setTimeout(function(){_tabs.classList.add('visible');}, 100);
+          if(_footer) setTimeout(function(){_footer.classList.add('visible');}, 150);
+          if(_scroll) setTimeout(function(){_scroll.classList.add('visible');}, 100);
+        });
+      } else if(open && wasVisible){
+        // Already visible — ensure all children also have .visible, strip any .hiding
+        [cluster].concat(_children).forEach(function(el){
+          if(el){el.classList.remove('hiding');if(!el.classList.contains('visible'))el.classList.add('visible');}
+        });
+      } else if(!open && wasVisible){
+        // ── HIDE (Mayhem hideMenu 1-1) ──
+        if(window.__staticHideTimer){clearTimeout(window.__staticHideTimer);window.__staticHideTimer=null;}
+        // Add .hiding to ALL simultaneously, remove .visible
+        [cluster].concat(_children).forEach(function(el){
+          if(el){el.classList.remove('visible');el.classList.add('hiding');}
+        });
+        // After 300ms, strip hiding
+        window.__staticHideTimer=setTimeout(function(){
+          [cluster].concat(_children).forEach(function(el){
+            if(el){el.classList.remove('hiding','visible');}
+          });
+          window.__staticHideTimer=null;
         },300);
-      } else if(open){
-        clearTimeout(window.__staticMayhemHideTimer);
-        cluster.classList.remove('mayhem-hiding');
-        cluster.classList.add('open');
-      } else if(!open){
-        cluster.classList.remove('open','mayhem-hiding');
+      } else if(!open && !wasVisible){
+        [cluster].concat(_children).forEach(function(el){if(el){el.classList.remove('visible','hiding');}});
       }
       const isKeybind = s.mode==='keybind';
       cluster.classList.toggle('keybind-mode', isKeybind);
@@ -3675,7 +3713,7 @@ window.pasteFromClipboard=pasteFromClipboard;
 </script>
 
 <!-- Mayhem Bubble UI (hovering-text) DOM -->
-<div class="hovering-text-wrap" id="hoveringTextWrap" tabindex="0" role="listbox" aria-hidden="true">
+<div class="hovering-text-wrap" id="hoveringTextWrap" tabindex="0" role="listbox" aria-hidden="true" data-hovering-text-hidden="true">
   <ul class="hovering-text-list" id="hoveringTextList"></ul>
 </div>
 <div class="hovering-text-toast" id="hoveringTextToast" role="status" aria-live="polite"></div>
@@ -3815,17 +3853,19 @@ window.pasteFromClipboard=pasteFromClipboard;
       htTransitioning = true;
       wrap.removeAttribute('data-hovering-text-hidden');
       wrap.setAttribute('aria-hidden', 'false');
-      // Start hidden, then animate in
-      wrap.classList.remove('ht-visible');
-      requestAnimationFrame(function(){
-        requestAnimationFrame(function(){
-          wrap.classList.add('ht-visible');
-          htTransitionTimeout = setTimeout(function(){
-            htTransitioning = false;
-            htTransitionTimeout = null;
-          }, 300);
-        });
-      });
+      /* Mayhem 1-1: inline style manipulation, setTimeout(10) reflow trick */
+      wrap.style.transition = 'none';
+      wrap.style.opacity = '0';
+      wrap.style.transform = 'translateX(-50%) translateY(1vh)';
+      setTimeout(function(){
+        wrap.style.transition = 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+        wrap.style.opacity = '1';
+        wrap.style.transform = 'translateX(-50%) translateY(0)';
+        htTransitionTimeout = setTimeout(function(){
+          htTransitioning = false;
+          htTransitionTimeout = null;
+        }, 300);
+      }, 10);
       wrap.focus();
       htRenderList();
     },
@@ -3835,12 +3875,16 @@ window.pasteFromClipboard=pasteFromClipboard;
       if(htTransitionTimeout){ clearTimeout(htTransitionTimeout); htTransitionTimeout=null; }
       htVisible = false;
       htTransitioning = true;
-      wrap.classList.remove('ht-visible');
+      /* Mayhem 1-1: different bezier for hide, inline styles */
+      wrap.style.transition = 'opacity 0.3s cubic-bezier(0.4, 0, 0.6, 1), transform 0.3s cubic-bezier(0.4, 0, 0.6, 1)';
+      wrap.style.opacity = '0';
+      wrap.style.transform = 'translateX(-50%) translateY(1vh)';
       htTransitionTimeout = setTimeout(function(){
-        htTransitioning = false;
-        htTransitionTimeout = null;
         wrap.setAttribute('data-hovering-text-hidden', 'true');
         wrap.setAttribute('aria-hidden', 'true');
+        try { wrap.blur(); } catch(e){}
+        htTransitioning = false;
+        htTransitionTimeout = null;
       }, 300);
     },
 
